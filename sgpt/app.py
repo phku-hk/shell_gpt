@@ -99,6 +99,13 @@ def main(
         help="Follow conversation with id, " 'use "temp" for quick session.',
         rich_help_panel="Chat Options",
     ),
+    brief: bool = typer.Option(
+        False,
+        "--brief",
+        "-b",
+        help="Generate a brief response.",
+        rich_help_panel="Assistance Options",
+    ),
     repl: str = typer.Option(
         None,
         help="Start a REPL (Read–eval–print loop) session.",
@@ -183,9 +190,9 @@ def main(
             # Non-interactive shell.
             pass
 
-    if sum((shell, describe_shell, code)) > 1:
+    if sum((shell, describe_shell, code, brief)) > 1:
         raise BadArgumentUsage(
-            "Only one of --shell, --describe-shell, and --code options can be used at a time."
+            "Only one of --shell, --describe-shell, --code and --brief options can be used at a time."
         )
 
     if chat and repl:
@@ -198,12 +205,15 @@ def main(
         prompt = get_edited_prompt()
 
     role_class = (
-        DefaultRoles.check_get(shell, describe_shell, code)
+        DefaultRoles.check_get(shell, describe_shell, code, brief)
         if not role
         else SystemRole.get(role)
     )
 
     function_schemas = (get_openai_schemas() or None) if functions else None
+
+    if len(sys.argv) == 1:
+        repl = "temp"
 
     if repl:
         # Will be in infinite loop here until user exits with Ctrl+C.

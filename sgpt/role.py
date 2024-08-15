@@ -34,6 +34,10 @@ If there is a lack of details, provide most logical solution.
 You are not allowed to ask for more details.
 For example if the prompt is "Hello world Python", you should return "print('Hello world')"."""
 
+BRIEF_ROLE = """Provide a brief response.
+If there is a lack of details, provide most logical solution.
+You are not allowed to ask for more details."""
+
 DEFAULT_ROLE = """You are programming and system administration assistant.
 You are managing {os} operating system with {shell} shell.
 Provide short responses in about 100 words, unless you are specifically asked for more details.
@@ -68,6 +72,7 @@ class SystemRole:
             SystemRole("Shell Command Generator", SHELL_ROLE, variables),
             SystemRole("Shell Command Descriptor", DESCRIBE_SHELL_ROLE, variables),
             SystemRole("Code Generator", CODE_ROLE),
+            SystemRole("Brief Role", BRIEF_ROLE),
         ):
             if not default_role._exists:
                 default_role._save()
@@ -167,15 +172,18 @@ class DefaultRoles(Enum):
     SHELL = "Shell Command Generator"
     DESCRIBE_SHELL = "Shell Command Descriptor"
     CODE = "Code Generator"
+    BRIEF = "Brief Role"
 
     @classmethod
-    def check_get(cls, shell: bool, describe_shell: bool, code: bool) -> SystemRole:
+    def check_get(cls, shell: bool, describe_shell: bool, code: bool, brief: bool) -> SystemRole:
         if shell:
             return SystemRole.get(DefaultRoles.SHELL.value)
         if describe_shell:
             return SystemRole.get(DefaultRoles.DESCRIBE_SHELL.value)
         if code:
             return SystemRole.get(DefaultRoles.CODE.value)
+        if brief:
+            return SystemRole.get(DefaultRoles.BRIEF.value)
         return SystemRole.get(DefaultRoles.DEFAULT.value)
 
     def get_role(self) -> SystemRole:
